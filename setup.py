@@ -17,6 +17,7 @@ classify = [
 setup(
     classifiers=classify,
     description="TubeStrike!\n\nAn Endless Commuter",
+    entry_points={"console_scripts": ["tubestrike = tubestrike:main"]},
     install_requires=["pygame"],
     license="GPLv3+",
     name="tubestrike",
