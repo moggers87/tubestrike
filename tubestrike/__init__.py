@@ -31,6 +31,7 @@ def loop():
     block = pygame.Rect(5, 5, 1014, 502)
     draw.rect(canvas, (255, 255, 255), block)
 
+    print("Entering main game loop...")
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -48,8 +49,13 @@ def loop():
         else:
             canvas_copy_res = (int(canvas_ratio * screen_res[1]), screen_res[1])
 
+        canvas_offset = (
+            -int((canvas_copy_res[0] - screen_res[0]) / 2),
+            -int((canvas_copy_res[1] - screen_res[1]) / 2),
+        )
+
         canvas_copy = pygame.transform.smoothscale(canvas, canvas_copy_res)
-        screen.blit(canvas_copy, (0, 0))
+        screen.blit(canvas_copy, canvas_offset)
 
         display.flip()
         clock.tick(24)
