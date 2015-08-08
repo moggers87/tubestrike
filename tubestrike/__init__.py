@@ -21,15 +21,37 @@ def setup():
     display.flip()
 
 
+def paint_canvas_onto_screen(screen, canvas):
+    """Paints (and scales) `canvas` onto `screen`"""
+    screen_res = screen.get_size()
+    screen_ratio = screen_res[0]/screen_res[1]
+    canvas_res = canvas.get_size()
+    canvas_ratio = canvas_res[0]/canvas_res[1]
+
+    if screen_ratio > canvas_ratio:
+        canvas_copy_res = (screen_res[0], int(screen_res[0] / canvas_ratio))
+    else:
+        canvas_copy_res = (int(canvas_ratio * screen_res[1]), screen_res[1])
+
+    canvas_offset = (
+        -int((canvas_copy_res[0] - screen_res[0]) / 2),
+        -int((canvas_copy_res[1] - screen_res[1]) / 2),
+    )
+
+    canvas_copy = pygame.transform.smoothscale(canvas, canvas_copy_res)
+    screen.blit(canvas_copy, canvas_offset)
+
+
 def loop():
     """Main gameloop"""
     clock = pygame.time.Clock()
     screen = display.get_surface()  # the "display"
-    canvas = pygame.Surface((1024, 512))
-    canvas.fill((128, 0, 128))
+    canvas = pygame.Surface((640, 200))
+    canvas.fill((128, 100, 200))
 
-    block = pygame.Rect(5, 5, 1014, 502)
-    draw.rect(canvas, (255, 255, 255), block)
+    n = 0
+    colours = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
+    block = pygame.Rect(295, 75, 50, 50)
 
     print("Entering main game loop...")
     while True:
@@ -39,24 +61,13 @@ def loop():
                 pygame.quit()
                 sys.exit()
 
-        screen_res = screen.get_size()
-        screen_ratio = screen_res[0]/screen_res[1]
-        canvas_res = canvas.get_size()
-        canvas_ratio = canvas_res[0]/canvas_res[1]
+        pressed = pygame.key.get_pressed()
+        if pressed[pygame.K_SPACE]:
+            n = (n + 1) % len(colours)
 
-        if screen_ratio > canvas_ratio:
-            canvas_copy_res = (screen_res[0], int(screen_res[0] / canvas_ratio))
-        else:
-            canvas_copy_res = (int(canvas_ratio * screen_res[1]), screen_res[1])
+        draw.rect(canvas, colours[n], block, 1)
 
-        canvas_offset = (
-            -int((canvas_copy_res[0] - screen_res[0]) / 2),
-            -int((canvas_copy_res[1] - screen_res[1]) / 2),
-        )
-
-        canvas_copy = pygame.transform.smoothscale(canvas, canvas_copy_res)
-        screen.blit(canvas_copy, canvas_offset)
-
+        paint_canvas_onto_screen(screen, canvas)
         display.flip()
         clock.tick(24)
 
