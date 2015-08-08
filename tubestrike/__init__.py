@@ -8,6 +8,8 @@ import pygame
 
 def setup():
     """Setup game environment"""
+    display.init()
+
     width = 800
     height = 600
 
