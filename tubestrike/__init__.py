@@ -12,6 +12,8 @@ def setup():
     display.init()
     pygame.font.init()
 
+    pygame.event.set_allowed(pygame.QUIT)
+
     width = 800
     height = 600
 
