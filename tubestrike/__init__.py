@@ -1,9 +1,10 @@
 from __future__ import division, print_function, unicode_literals
 
 from pkg_resources import resource_listdir, resource_stream, resource_filename
+import random
 import sys
 
-from pygame import draw, display
+from pygame import draw, display, transform
 import pygame
 
 
@@ -42,7 +43,7 @@ def paint_canvas_onto_screen(screen, canvas):
         -int((canvas_copy_res[1] - screen_res[1]) / 2),
     )
 
-    canvas_copy = pygame.transform.smoothscale(canvas, canvas_copy_res)
+    canvas_copy = transform.smoothscale(canvas, canvas_copy_res)
     screen.blit(canvas_copy, canvas_offset)
 
 
@@ -60,22 +61,28 @@ def loop():
         for name in font_names:
             if name.endswith(".ttf"):
                 fonts.append("{}/{}".format(asset, name))
+    fonts.sort()
 
     print("Entering main game loop...")
-    def render_text(canvas, font, text, colour, antialiasing=True):
+    def render_text(font, text, colour, antialiasing=True):
         print("Font: {}".format(font))
-        font = pygame.font.Font(resource_filename("tubestrike", "assets/fonts/" + font), 25)
+        font = pygame.font.Font(resource_filename("tubestrike", "assets/fonts/" + font), 40)
 
         title = font.render(text, antialiasing, colour)
-        title_size = title.get_size()
-        canvas_size = canvas.get_size()
+        return title
 
-        title_pos = (int(canvas_size[0]/2 - title_size[0]/2), int(canvas_size[1]/2 - title_size[1]/2))
+    title_surface = render_text(fonts[n], "Tubestrike!", (255, 255, 255))
+    title_center = (
+        int(canvas.get_size()[0]/2 - title_surface.get_size()[0]/2),
+        int(canvas.get_size()[1]/2 - title_surface.get_size()[1]/2),
+    )
 
-        canvas.blit(title, title_pos)
-
-    render_text(canvas, fonts[n], "Tubestrike!", (255, 255, 255))
     c = 0
+    zoom_val = 1
+    rot_val = 0
+    zoom_delta = 0
+    rot_delta = 0
+
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -85,12 +92,29 @@ def loop():
 
         pressed = pygame.key.get_pressed()
         if pressed[pygame.K_SPACE] and c == 0:
-            canvas.fill((128, 100, 200))
             n = (n + 1) % len(fonts)
             c = 12
 
-            render_text(canvas, fonts[n], "Tubestrike!", (255, 255, 255))
+            title_surface = render_text(fonts[n], "Tubestrike!", (255, 255, 255))
+            title_center = (
+                int(canvas.get_size()[0]/2 - title_surface.get_size()[0]/2),
+                int(canvas.get_size()[1]/2 - title_surface.get_size()[1]/2),
+            )
 
+        title_copy = transform.rotozoom(title_surface, 10, zoom_val)
+        title_center = (
+            int(canvas.get_size()[0]/2 - title_copy.get_size()[0]/2),
+            int(canvas.get_size()[1]/2 - title_copy.get_size()[1]/2),
+        )
+        canvas.fill((128, 100, 200))
+        canvas.blit(title_copy, title_center)
+
+        rot_val = rot_val + random.gauss(rot_delta, 1)
+        zoom_val = zoom_val + random.gauss(zoom_delta, 0.01)
+        if zoom_val > 1.25:
+            zoom_delta = zoom_delta - 0.1
+        elif zoom_val < 0.75:
+            zoom_delta = zoom_delta + 0.1
 
         if c > 0:
             c = c - 1
