@@ -73,8 +73,8 @@ def loop():
     c = 0
     zoom_val = 1
     rot_val = 0
-    zoom_delta = 0
-    rot_delta = 0
+    zoom_delta = 0.01
+    rot_delta = 0.1
 
     while True:
         for event in pygame.event.get():
@@ -91,12 +91,10 @@ def loop():
         canvas.fill((128, 100, 200))
         canvas.blit(title_copy, title_center)
 
-        rot_val = rot_val + random.gauss(rot_delta, 1)
-        zoom_val = zoom_val + random.gauss(zoom_delta, 0.01)
-        if zoom_val > 1.25:
-            zoom_delta = zoom_delta - 0.1
-        elif zoom_val < 0.75:
-            zoom_delta = zoom_delta + 0.1
+        rot_val = 15 * math.sin((math.pi * rot_delta) + 2)
+        zoom_val = math.sin(math.pi * zoom_delta) + 0.5
+        zoom_delta = (zoom_delta + 0.005) % 1
+        rot_delta = (rot_delta + 0.01) % 2
 
         if c > 0:
             c = c - 1
