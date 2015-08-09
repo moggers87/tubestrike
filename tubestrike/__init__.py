@@ -1,10 +1,11 @@
 from __future__ import division, print_function, unicode_literals
 
-from pkg_resources import resource_listdir, resource_stream, resource_filename
+from pkg_resources import resource_filename
+import math
 import random
 import sys
 
-from pygame import draw, display, transform
+from pygame import display, transform
 import pygame
 
 
@@ -54,24 +55,16 @@ def loop():
     canvas = pygame.Surface((640, 200))
     canvas.fill((128, 100, 200))
 
-    n = 0
-    font_sets = [(asset, resource_listdir("tubestrike", "assets/fonts/" + asset)) for asset in resource_listdir("tubestrike", "assets/fonts")]
-    fonts = []
-    for asset, font_names in font_sets:
-        for name in font_names:
-            if name.endswith(".ttf"):
-                fonts.append("{}/{}".format(asset, name))
-    fonts.sort()
-
     print("Entering main game loop...")
-    def render_text(font, text, colour, antialiasing=True):
-        print("Font: {}".format(font))
-        font = pygame.font.Font(resource_filename("tubestrike", "assets/fonts/" + font), 40)
+    def render_text(text, colour, antialiasing=True):
+        # PyGame 1.9.1 doesn't seem to like file objects
+        # TODO: use resource_stream once it works
+        font = pygame.font.Font(resource_filename("tubestrike", "assets/fonts/Hammersmith_One/HammersmithOne-Regular.ttf"), 40)
 
         title = font.render(text, antialiasing, colour)
         return title
 
-    title_surface = render_text(fonts[n], "Tubestrike!", (255, 255, 255))
+    title_surface = render_text("Tubestrike!", (255, 255, 255))
     title_center = (
         int(canvas.get_size()[0]/2 - title_surface.get_size()[0]/2),
         int(canvas.get_size()[1]/2 - title_surface.get_size()[1]/2),
@@ -90,18 +83,7 @@ def loop():
                 pygame.quit()
                 sys.exit()
 
-        pressed = pygame.key.get_pressed()
-        if pressed[pygame.K_SPACE] and c == 0:
-            n = (n + 1) % len(fonts)
-            c = 12
-
-            title_surface = render_text(fonts[n], "Tubestrike!", (255, 255, 255))
-            title_center = (
-                int(canvas.get_size()[0]/2 - title_surface.get_size()[0]/2),
-                int(canvas.get_size()[1]/2 - title_surface.get_size()[1]/2),
-            )
-
-        title_copy = transform.rotozoom(title_surface, 10, zoom_val)
+        title_copy = transform.rotozoom(title_surface, rot_val, zoom_val)
         title_center = (
             int(canvas.get_size()[0]/2 - title_copy.get_size()[0]/2),
             int(canvas.get_size()[1]/2 - title_copy.get_size()[1]/2),
