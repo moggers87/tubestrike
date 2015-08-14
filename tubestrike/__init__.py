@@ -20,7 +20,7 @@ def setup():
     height = 600
 
     print("Setting game resolution to {} x {}".format(width, height))
-    screen = display.set_mode((width, height), pygame.DOUBLEBUF)
+    screen = display.set_mode((width, height), pygame.DOUBLEBUF | pygame.HWSURFACE)
     display.set_caption("tubestrike!")
 
     screen.fill((0, 0, 0))
@@ -32,7 +32,7 @@ def make_track_surface():
     track_shape = (640, 5)
     track_shadow = (640, 3)
     sleeper = (10, 40)
-    surf = pygame.Surface((640, 40), flags=pygame.SRCALPHA)
+    surf = pygame.Surface((640, 40), flags=pygame.SRCALPHA | pygame.HWSURFACE)
     # sleepers
     for i in xrange(5, 640, 20):
         draw.rect(surf, (178, 150, 250), pygame.Rect((i, 0), sleeper))
@@ -71,7 +71,7 @@ def loop():
     """Main gameloop"""
     clock = pygame.time.Clock()
     screen = display.get_surface()  # the "display"
-    canvas = pygame.Surface((640, 200))
+    canvas = pygame.Surface((640, 200), flags=pygame.HWSURFACE)
     canvas.fill((128, 100, 200))
 
     # PyGame 1.9.1 doesn't seem to like file objects
