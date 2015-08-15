@@ -9,18 +9,22 @@ from pygame import display, draw, transform
 import pygame
 
 
+DISPLAY_MODES = pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE
+
+
 def setup():
     """Setup game environment"""
     display.init()
     pygame.font.init()
 
-    pygame.event.set_allowed(pygame.QUIT)
+    pygame.event.set_allowed(None)  # disable all events
+    pygame.event.set_allowed((pygame.QUIT, pygame.VIDEORESIZE))  # re-enable some events
 
     width = 800
     height = 600
 
     print("Setting game resolution to {} x {}".format(width, height))
-    screen = display.set_mode((width, height), pygame.DOUBLEBUF | pygame.HWSURFACE)
+    screen = display.set_mode((width, height), DISPLAY_MODES)
     display.set_caption("tubestrike!")
 
     screen.fill((0, 0, 0))
@@ -91,6 +95,9 @@ def loop():
     zoom_delta = 0.01
     rot_delta = 0.1
 
+    # screen resize stuff
+    size = None
+    cool_down = 0
     print("Entering main game loop...")
     while True:
         for event in pygame.event.get():
@@ -98,6 +105,9 @@ def loop():
                 print("Quitting...")
                 pygame.quit()
                 sys.exit()
+            elif event.type == pygame.VIDEORESIZE:
+                size = (event.dict["w"], event.dict["h"])
+                cool_down = 5
 
         canvas.fill((128, 100, 200))
         canvas.blit(track_surface, (0, 148))
@@ -113,6 +123,14 @@ def loop():
         zoom_val = math.sin(math.pi * zoom_delta) + 0.5
         zoom_delta = (zoom_delta + 0.005) % 1
         rot_delta = (rot_delta + 0.01) % 2
+
+        # work around for gnomeshell/sdl bug
+        if size is not None and cool_down == 0:
+            print("Setting game resolution to {} x {}".format(*size))
+            screen = display.set_mode(size, DISPLAY_MODES)
+            size = None
+        elif cool_down > 0:
+            cool_down = cool_down - 1
 
         paint_canvas_onto_screen(screen, canvas)
         display.flip()
