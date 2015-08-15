@@ -18,7 +18,7 @@ def setup():
     pygame.font.init()
 
     pygame.event.set_allowed(None)  # disable all events
-    pygame.event.set_allowed((pygame.QUIT, pygame.VIDEORESIZE))  # re-enable some events
+    pygame.event.set_allowed((pygame.QUIT, pygame.VIDEORESIZE, pygame.ACTIVEEVENT))  # re-enable some events
 
     width = 800
     height = 600
@@ -95,9 +95,8 @@ def loop():
     zoom_delta = 0.01
     rot_delta = 0.1
 
-    # screen resize stuff
     size = None
-    cool_down = 0
+
     print("Entering main game loop...")
     while True:
         for event in pygame.event.get():
@@ -106,8 +105,12 @@ def loop():
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.VIDEORESIZE:
-                size = (event.dict["w"], event.dict["h"])
-                cool_down = 5
+                size = event.dict["size"]
+            elif event.type == pygame.ACTIVEEVENT:
+                if event.dict["state"] == 2:
+                    # we might be resizing, set this to prevent mode setting
+                    # see issue #2
+                    resizing = event.dict["gain"] == 0
 
         canvas.fill((128, 100, 200))
         canvas.blit(track_surface, (0, 148))
@@ -125,12 +128,11 @@ def loop():
         rot_delta = (rot_delta + 0.01) % 2
 
         # work around for gnomeshell/sdl bug
-        if size is not None and cool_down == 0:
+        # see issue #2
+        if size is not None and not resizing:
             print("Setting game resolution to {} x {}".format(*size))
             screen = display.set_mode(size, DISPLAY_MODES)
             size = None
-        elif cool_down > 0:
-            cool_down = cool_down - 1
 
         paint_canvas_onto_screen(screen, canvas)
         display.flip()
