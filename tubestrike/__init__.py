@@ -32,8 +32,8 @@ def setup():
         pygame.KEYDOWN,
     ))  # re-enable some events
 
-    width = 800
-    height = 600
+    width = 1280
+    height = 400
 
     print("Setting game resolution to {} x {}".format(width, height))
     screen = display.set_mode((width, height), DISPLAY_MODES)
@@ -168,18 +168,19 @@ class MoveOver(object):
 
     def render(self):
         self.canvas.fill(BACKGROUND_COLOUR)
+        reduced = 10
         if self.remains > 0 and self.from_scene is not None:
             self.canvas.blit(self.track_surface, (self.remains, 148))
             self.from_scene.render()
 
             self.canvas.blit(self.from_scene.canvas, ((self.remains - self.from_scene.canvas.get_size()[0]), 0))
-            self.remains -= 3
+            self.remains -= reduced
         elif self.remains > 0 and self.from_scene is None:
             self.canvas.blit(self.to_scene.canvas, (self.remains, 0))
             self.to_scene.render()
 
             self.canvas.blit(self.track_surface, (self.remains - self.to_scene.canvas.get_size()[0], 148))
-            self.remains -= 3
+            self.remains -= reduced
         elif self.from_scene is not None:
             self.canvas.blit(self.track_surface, (self.remains, 148))
             self.from_scene = None
@@ -231,7 +232,7 @@ def loop():
         paint_canvas_onto_screen(screen, current_scene.canvas)
         display.flip()
         current_scene = current_scene.next_scene
-        clock.tick(24)
+        clock.tick(60)
 
 
 def main():
