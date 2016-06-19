@@ -18,7 +18,12 @@ def setup():
     pygame.font.init()
 
     pygame.event.set_allowed(None)  # disable all events
-    pygame.event.set_allowed((pygame.QUIT, pygame.VIDEORESIZE, pygame.ACTIVEEVENT))  # re-enable some events
+    pygame.event.set_allowed((
+        pygame.QUIT,
+        pygame.VIDEORESIZE,
+        pygame.ACTIVEEVENT,
+        pygame.KEYDOWN,
+    ))  # re-enable some events
 
     width = 800
     height = 600
@@ -71,35 +76,58 @@ def paint_canvas_onto_screen(screen, canvas):
     screen.blit(canvas_copy, canvas_offset)
 
 
+class Menu(object):
+    def __init__(self):
+        self.canvas = pygame.Surface((640, 200), flags=pygame.HWSURFACE)
+
+        # PyGame 1.9.1 doesn't seem to like file objects
+        # TODO: use resource_stream once it works
+        title_font = pygame.font.Font(resource_filename("tubestrike", "assets/fonts/Hammersmith_One/HammersmithOne-Regular.ttf"), 40)
+
+        self.title_surface = title_font.render("Tubestrike!", True, (255, 255, 255))
+        self.track_surface = make_track_surface()
+
+        self.zoom_val = 1
+        self.rot_val = 0
+        self.zoom_delta = 0.01
+        self.rot_delta = 0.1
+
+        self.next_scene = self
+
+    def render(self):
+        self.canvas.fill((128, 100, 200))
+        self.canvas.blit(self.track_surface, (0, 148))
+
+        title_copy = transform.rotozoom(self.title_surface, self.rot_val, self.zoom_val)
+        title_center = (
+            int(self.canvas.get_size()[0]/2 - title_copy.get_size()[0]/2),
+            int(self.canvas.get_size()[1]/3 - title_copy.get_size()[1]/2),
+        )
+        self.canvas.blit(title_copy, title_center)
+
+        self.rot_val = 15 * math.sin((math.pi * self.rot_delta) + 2)
+        self.zoom_val = math.sin(math.pi * self.zoom_delta) + 0.5
+        self.zoom_delta = (self.zoom_delta + 0.005) % 1
+        self.rot_delta = (self.rot_delta + 0.01) % 2
+
+    def event_KEYDOWN(self, event):
+        if event.key == pygame.K_q:
+            pygame.event.post(pygame.event.Event(pygame.QUIT))
+
+
 def loop():
     """Main gameloop"""
     clock = pygame.time.Clock()
     screen = display.get_surface()  # the "display"
-    canvas = pygame.Surface((640, 200), flags=pygame.HWSURFACE)
-    canvas.fill((128, 100, 200))
-
-    # PyGame 1.9.1 doesn't seem to like file objects
-    # TODO: use resource_stream once it works
-    font = pygame.font.Font(resource_filename("tubestrike", "assets/fonts/Hammersmith_One/HammersmithOne-Regular.ttf"), 40)
-
-    title_surface = font.render("Tubestrike!", True, (255, 255, 255))
-    title_center = (
-        int(canvas.get_size()[0]/2 - title_surface.get_size()[0]/2),
-        int(canvas.get_size()[1]/2 - title_surface.get_size()[1]/2),
-    )
-
-    track_surface = make_track_surface()
-
-    zoom_val = 1
-    rot_val = 0
-    zoom_delta = 0.01
-    rot_delta = 0.1
 
     size = None
+
+    current_scene = Menu()
 
     print("Entering main game loop...")
     while True:
         for event in pygame.event.get():
+            event_key = "event_%s" % pygame.event.event_name(event.type).upper()
             if event.type == pygame.QUIT:
                 print("Quitting...")
                 pygame.quit()
@@ -111,21 +139,8 @@ def loop():
                     # we might be resizing, set this to prevent mode setting
                     # see issue #2
                     resizing = event.dict["gain"] == 0
-
-        canvas.fill((128, 100, 200))
-        canvas.blit(track_surface, (0, 148))
-
-        title_copy = transform.rotozoom(title_surface, rot_val, zoom_val)
-        title_center = (
-            int(canvas.get_size()[0]/2 - title_copy.get_size()[0]/2),
-            int(canvas.get_size()[1]/2 - title_copy.get_size()[1]/2),
-        )
-        canvas.blit(title_copy, title_center)
-
-        rot_val = 15 * math.sin((math.pi * rot_delta) + 2)
-        zoom_val = math.sin(math.pi * zoom_delta) + 0.5
-        zoom_delta = (zoom_delta + 0.005) % 1
-        rot_delta = (rot_delta + 0.01) % 2
+            elif hasattr(current_scene, event_key):
+                getattr(current_scene, event_key)(event)
 
         # work around for gnomeshell/sdl bug
         # see issue #2
@@ -133,9 +148,10 @@ def loop():
             print("Setting game resolution to {} x {}".format(*size))
             screen = display.set_mode(size, DISPLAY_MODES)
             size = None
-
-        paint_canvas_onto_screen(screen, canvas)
+        current_scene.render()
+        paint_canvas_onto_screen(screen, current_scene.canvas)
         display.flip()
+        current_scene = current_scene.next_scene
         clock.tick(24)
 
 
