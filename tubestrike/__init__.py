@@ -2,7 +2,6 @@ from __future__ import division, print_function, unicode_literals
 
 from pkg_resources import resource_filename
 import math
-import random
 import sys
 
 from pygame import display, draw, transform
