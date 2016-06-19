@@ -6,6 +6,7 @@ import sys
 
 from pygame import display, draw, transform
 import pygame
+import numpy
 
 
 DISPLAY_MODES = pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE
@@ -37,19 +38,28 @@ def setup():
 
 def make_track_surface():
     """Paint some tracks onto a surface"""
+    light_colour = (178, 150, 250)
+    dark_colour = (153, 125, 225)
+
     track_shape = (640, 5)
     track_shadow = (640, 3)
     sleeper = (10, 40)
+    sleeper_shadows = (10, 2)
+
     surf = pygame.Surface((640, 40), flags=pygame.SRCALPHA | pygame.HWSURFACE)
+
     # sleepers
     for i in xrange(5, 640, 20):
-        draw.rect(surf, (178, 150, 250), pygame.Rect((i, 0), sleeper))
+        draw.rect(surf, light_colour, pygame.Rect((i, 0), sleeper))
+        draw.rect(surf, dark_colour, pygame.Rect((i, 0), sleeper_shadows))
+        draw.rect(surf, dark_colour, pygame.Rect((i, 25), sleeper_shadows))
+        draw.rect(surf, dark_colour, pygame.Rect((i, 38), sleeper_shadows))
 
     # tracks
-    draw.rect(surf, (178, 150, 250), pygame.Rect((0, 2), track_shape))
-    draw.rect(surf, (153, 125, 225), pygame.Rect((0, 7), track_shadow))
-    draw.rect(surf, (178, 150, 250), pygame.Rect((0, 27), track_shape))
-    draw.rect(surf, (153, 125, 225), pygame.Rect((0, 32), track_shadow))
+    draw.rect(surf, light_colour, pygame.Rect((0, 2), track_shape))
+    draw.rect(surf, dark_colour, pygame.Rect((0, 7), track_shadow))
+    draw.rect(surf, light_colour, pygame.Rect((0, 27), track_shape))
+    draw.rect(surf, dark_colour, pygame.Rect((0, 32), track_shadow))
 
     return surf
 
@@ -82,8 +92,10 @@ class Menu(object):
         # PyGame 1.9.1 doesn't seem to like file objects
         # TODO: use resource_stream once it works
         title_font = pygame.font.Font(resource_filename("tubestrike", "assets/fonts/Hammersmith_One/HammersmithOne-Regular.ttf"), 40)
+        title_font_shadow = pygame.font.Font(resource_filename("tubestrike", "assets/fonts/Hammersmith_One/HammersmithOne-Regular.ttf"), 50)
 
         self.title_surface = title_font.render("Tubestrike!", True, (255, 255, 255))
+        self.title_surface_shadow = title_font_shadow.render("Tubestrike!", True, (255, 255, 255))
         self.track_surface = make_track_surface()
 
         self.zoom_val = 1
@@ -98,16 +110,29 @@ class Menu(object):
         self.canvas.blit(self.track_surface, (0, 148))
 
         title_copy = transform.rotozoom(self.title_surface, self.rot_val, self.zoom_val)
+        title_shadow_copy = transform.rotozoom(self.title_surface_shadow, self.rot_val * 2.1, self.zoom_val)
         title_center = (
             int(self.canvas.get_size()[0]/2 - title_copy.get_size()[0]/2),
             int(self.canvas.get_size()[1]/3 - title_copy.get_size()[1]/2),
         )
+
+        title_shadow_center = (
+            int(self.canvas.get_size()[0]/2 - title_shadow_copy.get_size()[0]/2),
+            int(self.canvas.get_size()[1]/3 - title_shadow_copy.get_size()[1]/2),
+        )
+
+        # shadow effect
+        pixels_alpha = pygame.surfarray.pixels_alpha(title_shadow_copy)
+        pixels_alpha[...] = (pixels_alpha * (50 / 255.0)).astype(numpy.uint8)
+        del pixels_alpha  # unlock surface
+
+        self.canvas.blit(title_shadow_copy, title_shadow_center)
         self.canvas.blit(title_copy, title_center)
 
         self.rot_val = 15 * math.sin((math.pi * self.rot_delta) + 2)
         self.zoom_val = math.sin(math.pi * self.zoom_delta) + 0.5
-        self.zoom_delta = (self.zoom_delta + 0.005) % 1
-        self.rot_delta = (self.rot_delta + 0.01) % 2
+        self.zoom_delta = (self.zoom_delta + 0.0039) % 1
+        self.rot_delta = (self.rot_delta + 0.008) % 2
 
     def event_KEYDOWN(self, event):
         if event.key == pygame.K_q:
