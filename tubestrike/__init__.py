@@ -92,10 +92,8 @@ class Menu(object):
         # PyGame 1.9.1 doesn't seem to like file objects
         # TODO: use resource_stream once it works
         title_font = pygame.font.Font(resource_filename("tubestrike", "assets/fonts/Hammersmith_One/HammersmithOne-Regular.ttf"), 40)
-        title_font_shadow = pygame.font.Font(resource_filename("tubestrike", "assets/fonts/Hammersmith_One/HammersmithOne-Regular.ttf"), 50)
 
         self.title_surface = title_font.render("Tubestrike!", True, (255, 255, 255))
-        self.title_surface_shadow = title_font_shadow.render("Tubestrike!", True, (255, 255, 255))
         self.track_surface = make_track_surface()
 
         self.zoom_val = 1
@@ -110,7 +108,7 @@ class Menu(object):
         self.canvas.blit(self.track_surface, (0, 148))
 
         title_copy = transform.rotozoom(self.title_surface, self.rot_val, self.zoom_val)
-        title_shadow_copy = transform.rotozoom(self.title_surface_shadow, self.rot_val * 2.1, self.zoom_val)
+        title_shadow_copy = transform.rotozoom(self.title_surface, self.rot_val * 2.1, self.zoom_val + 0.5)
         title_center = (
             int(self.canvas.get_size()[0]/2 - title_copy.get_size()[0]/2),
             int(self.canvas.get_size()[1]/3 - title_copy.get_size()[1]/2),
