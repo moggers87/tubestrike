@@ -11,6 +11,13 @@ import numpy
 
 DISPLAY_MODES = pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE
 
+# colours
+WHITE = (255, 255, 255)
+LIGHT_COLOUR = (178, 150, 250)
+DARK_COLOUR = (153, 125, 225)
+BACKGROUND_COLOUR = (128, 100, 200)
+BLACK = (0, 0, 0)
+
 
 def setup():
     """Setup game environment"""
@@ -32,15 +39,12 @@ def setup():
     screen = display.set_mode((width, height), DISPLAY_MODES)
     display.set_caption("tubestrike!")
 
-    screen.fill((0, 0, 0))
+    screen.fill(BLACK)
     display.flip()
 
 
 def make_track_surface():
     """Paint some tracks onto a surface"""
-    light_colour = (178, 150, 250)
-    dark_colour = (153, 125, 225)
-
     track_shape = (640, 5)
     track_shadow = (640, 3)
     sleeper = (10, 40)
@@ -50,16 +54,16 @@ def make_track_surface():
 
     # sleepers
     for i in xrange(5, 640, 20):
-        draw.rect(surf, light_colour, pygame.Rect((i, 0), sleeper))
-        draw.rect(surf, dark_colour, pygame.Rect((i, 0), sleeper_shadows))
-        draw.rect(surf, dark_colour, pygame.Rect((i, 25), sleeper_shadows))
-        draw.rect(surf, dark_colour, pygame.Rect((i, 38), sleeper_shadows))
+        draw.rect(surf, LIGHT_COLOUR, pygame.Rect((i, 0), sleeper))
+        draw.rect(surf, DARK_COLOUR, pygame.Rect((i, 0), sleeper_shadows))
+        draw.rect(surf, DARK_COLOUR, pygame.Rect((i, 25), sleeper_shadows))
+        draw.rect(surf, DARK_COLOUR, pygame.Rect((i, 38), sleeper_shadows))
 
     # tracks
-    draw.rect(surf, light_colour, pygame.Rect((0, 2), track_shape))
-    draw.rect(surf, dark_colour, pygame.Rect((0, 7), track_shadow))
-    draw.rect(surf, light_colour, pygame.Rect((0, 27), track_shape))
-    draw.rect(surf, dark_colour, pygame.Rect((0, 32), track_shadow))
+    draw.rect(surf, LIGHT_COLOUR, pygame.Rect((0, 2), track_shape))
+    draw.rect(surf, DARK_COLOUR, pygame.Rect((0, 7), track_shadow))
+    draw.rect(surf, LIGHT_COLOUR, pygame.Rect((0, 27), track_shape))
+    draw.rect(surf, DARK_COLOUR, pygame.Rect((0, 32), track_shadow))
 
     return surf
 
@@ -94,8 +98,8 @@ class Menu(object):
         title_font = pygame.font.Font(resource_filename("tubestrike", "assets/fonts/Hammersmith_One/HammersmithOne-Regular.ttf"), 40)
         subtitle_font = pygame.font.Font(resource_filename("tubestrike", "assets/fonts/Roboto_Mono/RobotoMono-Regular.ttf"), 15)
 
-        self.title_surface = title_font.render("Tubestrike!", True, (255, 255, 255))
-        self.subtitle_surface = subtitle_font.render("PRESS SPACE TO START", True, (255, 255, 255))
+        self.title_surface = title_font.render("Tubestrike!", True, WHITE)
+        self.subtitle_surface = subtitle_font.render("PRESS SPACE TO START", True, WHITE)
 
         if track is None:
             self.track_surface = make_track_surface()
@@ -110,7 +114,7 @@ class Menu(object):
         self.next_scene = self
 
     def render(self):
-        self.canvas.fill((128, 100, 200))
+        self.canvas.fill(BACKGROUND_COLOUR)
         self.canvas.blit(self.track_surface, (0, 148))
 
         title_copy = transform.rotozoom(self.title_surface, self.rot_val, self.zoom_val)
@@ -163,7 +167,7 @@ class MoveOver(object):
         self.next_scene = self
 
     def render(self):
-        self.canvas.fill((128, 100, 200))
+        self.canvas.fill(BACKGROUND_COLOUR)
         if self.remains > 0 and self.from_scene is not None:
             self.canvas.blit(self.track_surface, (self.remains, 148))
             self.from_scene.render()
