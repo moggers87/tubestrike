@@ -67,6 +67,28 @@ def make_track_surface():
 
     return surf
 
+def make_platform_surface():
+    surf = pygame.Surface((640, 148), flags=pygame.SRCALPHA | pygame.HWSURFACE)
+
+    for x in xrange(40, 600, 40):
+        draw.rect(surf, LIGHT_COLOUR, pygame.Rect((x, 122), (40, 23)))
+        draw.rect(surf, DARK_COLOUR, pygame.Rect((x, 130), (40, 4)))
+        draw.aaline(surf, BACKGROUND_COLOUR, (x, 140), (x + 40, 140))
+        draw.aaline(surf, BACKGROUND_COLOUR, (x + 19, 146), (x + 21, 134))
+
+    # tunnels
+    draw.rect(surf, DARK_COLOUR, pygame.Rect((35, 0), (5, 147)))
+    draw.rect(surf, LIGHT_COLOUR, pygame.Rect((20, 0), (15, 147)))
+
+    draw.rect(surf, DARK_COLOUR, pygame.Rect((600, 0), (5, 147)))
+    draw.rect(surf, LIGHT_COLOUR, pygame.Rect((605, 0), (15, 147)))
+
+    # roof
+    draw.rect(surf, DARK_COLOUR, pygame.Rect((40, 0), (560, 10)))
+    draw.rect(surf, LIGHT_COLOUR, pygame.Rect((40, 10), (560, 20)))
+
+    return surf
+
 
 def paint_canvas_onto_screen(screen, canvas):
     """Paints (and scales) `canvas` onto `screen`"""
@@ -105,6 +127,7 @@ class Menu(object):
             self.track_surface = make_track_surface()
         else:
             self.track_surface = track
+        self.platform_surface = make_platform_surface()
 
         self.zoom_val = 1
         self.rot_val = 0
@@ -116,6 +139,7 @@ class Menu(object):
     def render(self):
         self.canvas.fill(BACKGROUND_COLOUR)
         self.canvas.blit(self.track_surface, (0, 148))
+        self.canvas.blit(self.platform_surface, (0, 0))
 
         title_copy = transform.rotozoom(self.title_surface, self.rot_val, self.zoom_val)
         title_shadow_copy = transform.rotozoom(self.title_surface, self.rot_val * 2.1, self.zoom_val + 0.5)
