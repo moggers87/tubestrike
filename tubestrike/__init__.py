@@ -142,15 +142,15 @@ class Menu(object):
         self.canvas.blit(self.platform_surface, (0, 0))
 
         title_copy = transform.rotozoom(self.title_surface, self.rot_val, self.zoom_val)
-        title_shadow_copy = transform.rotozoom(self.title_surface, self.rot_val * 2.1, self.zoom_val + 0.5)
+        title_shadow_copy = transform.rotozoom(self.title_surface, self.rot_val * 1.5, self.zoom_val + 0.1)
         title_center = (
             int(self.canvas.get_size()[0]/2 - title_copy.get_size()[0]/2),
             int(self.canvas.get_size()[1]/3 - title_copy.get_size()[1]/2),
         )
 
         title_shadow_center = (
-            int(self.canvas.get_size()[0]/2 - title_shadow_copy.get_size()[0]/2),
-            int(self.canvas.get_size()[1]/3 - title_shadow_copy.get_size()[1]/2),
+            int(self.canvas.get_size()[0]/2 - title_shadow_copy.get_size()[0]/2) + self.zoom_val,
+            int(self.canvas.get_size()[1]/3 - title_shadow_copy.get_size()[1]/2) + self.rot_val,
         )
         subtitle_center = (
             int(self.canvas.get_size()[0]/2 - self.subtitle_surface.get_size()[0]/2),
@@ -166,10 +166,10 @@ class Menu(object):
         self.canvas.blit(title_copy, title_center)
         self.canvas.blit(self.subtitle_surface, subtitle_center)
 
-        self.rot_val = 15 * math.sin((math.pi * self.rot_delta) + 2)
+        self.rot_val = 5 * math.sin((math.pi * self.rot_delta) + 2)
         self.zoom_val = math.sin(math.pi * self.zoom_delta) + 0.5
         self.zoom_delta = (self.zoom_delta + 0.0039) % 1
-        self.rot_delta = (self.rot_delta + 0.008) % 2
+        self.rot_delta = (self.rot_delta + 0.005) % 2
 
     def event_KEYDOWN(self, event):
         if event.key == pygame.K_q:
