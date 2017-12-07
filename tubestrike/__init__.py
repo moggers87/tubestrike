@@ -37,7 +37,7 @@ def setup():
 
     print("Setting game resolution to {} x {}".format(width, height))
     screen = display.set_mode((width, height), DISPLAY_MODES)
-    display.set_caption("tubestrike!")
+    display.set_caption("Tubestrike!")
 
     screen.fill(BLACK)
     display.flip()
